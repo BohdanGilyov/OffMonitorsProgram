@@ -10,7 +10,7 @@ import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
-public class MultiMonitorExample {
+public class Main {
 
     private static GraphicsDevice[] monitors;
     private static JFrame[] blackScreens;
@@ -19,15 +19,13 @@ public class MultiMonitorExample {
     private static boolean hotkeyUsed;
 
     public static void main(String[] args) {
-        monitors = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getScreenDevices();
+        monitors = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
 
         blackScreens = new JFrame[monitors.length];
 
-        System.out.println("=====================================");
+        System.out.println("====================================");
         System.out.println("       OFF MONITOR PROGRAM");
-        System.out.println("=====================================" + "\n");
+        System.out.println("====================================" + "\n");
         System.out.println("Detected monitors: " + monitors.length);
         System.out.println();
         System.out.println("Keyboard shortcuts:");
@@ -43,7 +41,6 @@ public class MultiMonitorExample {
         if (index < 0 || index >= monitors.length) {
             return;
         }
-
         if (blackScreens[index] == null) {
             blackenMonitor(index);
             System.out.println("Monitor " + (index + 1) + " blacked out");
@@ -57,36 +54,28 @@ public class MultiMonitorExample {
         if (blackScreens[index] != null) {
             return;
         }
-
         GraphicsDevice monitor = monitors[index];
-
         JFrame frame = new JFrame();
         frame.setUndecorated(true);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setBackground(Color.BLACK);
         frame.setFocusableWindowState(false);
-
         JPanel panel = new JPanel();
         panel.setBackground(Color.BLACK);
         frame.setContentPane(panel);
-
         blackScreens[index] = frame;
-
         monitor.setFullScreenWindow(frame);
         frame.setVisible(true);
     }
 
     private static void restoreMonitor(int index) {
         JFrame frame = blackScreens[index];
-
         if (frame == null) {
             return;
         }
-
         if (monitors[index].getFullScreenWindow() == frame) {
             monitors[index].setFullScreenWindow(null);
         }
-
         frame.dispose();
         blackScreens[index] = null;
     }
@@ -95,29 +84,21 @@ public class MultiMonitorExample {
         for (int i = 0; i < monitors.length; i++) {
             restoreMonitor(i);
         }
-
         System.out.println("All monitors restored");
     }
 
     private static void registerHotkeys() {
-        Logger logger = Logger.getLogger(
-                GlobalScreen.class.getPackage().getName());
-
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
         logger.setLevel(Level.OFF);
-
         try {
             GlobalScreen.registerNativeHook();
-
             GlobalScreen.addNativeKeyListener(new NativeKeyListener() {
-
                 @Override
                 public void nativeKeyPressed(NativeKeyEvent e) {
                     int key = e.getKeyCode();
-
                     if (key == NativeKeyEvent.VC_CONTROL) {
                         ctrlPressed = true;
                     }
-
                     if (ctrlPressed && !hotkeyUsed) {
                         if (key == NativeKeyEvent.VC_OPEN_BRACKET) {
                             hotkeyUsed = true;
@@ -127,34 +108,24 @@ public class MultiMonitorExample {
                             SwingUtilities.invokeLater(() -> toggleMonitor(1));
                         } else if (key == NativeKeyEvent.VC_BACK_SLASH) {
                             hotkeyUsed = true;
-                            SwingUtilities.invokeLater(MultiMonitorExample::restoreAllMonitors);
+                            SwingUtilities.invokeLater(Main::restoreAllMonitors);
                         }
                     }
                 }
-
                 @Override
                 public void nativeKeyReleased(NativeKeyEvent e) {
                     int key = e.getKeyCode();
-
                     if (key == NativeKeyEvent.VC_CONTROL) {
                         ctrlPressed = false;
                     }
-
                     if (key == NativeKeyEvent.VC_CONTROL || key == NativeKeyEvent.VC_OPEN_BRACKET || key == NativeKeyEvent.VC_CLOSE_BRACKET || key == NativeKeyEvent.VC_BACK_SLASH) {
                         hotkeyUsed = false;
                     }
                 }
-
-                @Override
-                public void nativeKeyTyped(NativeKeyEvent e) {
-                    // No action required.
-                }
             });
-
-            System.out.println("Global keyboard shortcuts registered:");
-
+            System.out.println("Shortcuts registered:");
         } catch (NativeHookException e) {
-            System.err.println("Failed to register keyboard shortcuts");
+            System.err.println("Failed to register shortcuts");
             e.printStackTrace();
         }
     }
