@@ -132,7 +132,7 @@ public class Main {
                         return;
                     }
 
-                    if (monitors.length == 2) {
+                    if (monitors.length <= 2) {
                         if (key == NativeKeyEvent.VC_OPEN_BRACKET) {
                             hotkeyUsed = true;
                             SwingUtilities.invokeLater(
